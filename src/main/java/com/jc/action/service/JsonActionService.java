@@ -33,7 +33,7 @@ public class JsonActionService implements ActionService {
             // thread doing all the work while the client waits.
         }
         catch (Exception e) {
-            // Invalid JSON maybe?
+            // Invalid JSON, null actionJson, etc.
             return new Error(e);
         }
         return null;
@@ -51,7 +51,7 @@ public class JsonActionService implements ActionService {
 
     @Override
     public ActionStatistics getActionStatistics(final String action) {
-        return statsManager.getActionsMap().get(action);
+        return statsManager.getActionStatistics(action);
     }
 
     /**
@@ -72,9 +72,9 @@ public class JsonActionService implements ActionService {
      * @throws JsonProcessingException If unable to serialize to JSON
      */
     private String statsToJson() throws JsonProcessingException {
-        return objectMapper.writeValueAsString(statsManager.getActionsMap().values());
+        return objectMapper.writeValueAsString(statsManager.getActionStatistics());
         // Pretty version...
-        // return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(statsManager.getActionsMap().values());
+        // return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(statsManager.getActionStatistics());
     }
 
 }

@@ -1,5 +1,7 @@
 package com.jc.action;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,22 +21,34 @@ public class ActionStatisticsManager {
      * @param action The Action to add
      */
     public void addAction(final Action action) {
-
-        // If we don't already have an ActionStatistics for this action,
-        // create one and add it to the Map, otherwise just get from map.
-        // Then update the ActionStatistics with the new Action
-        actionsMap.computeIfAbsent(action.getName(), stats -> new ActionStatistics(action.getName()))
-                  .updateStats(action);
-
+        if (action != null) {
+            // If we don't already have an ActionStatistics for this action,
+            // create one and add it to the Map, otherwise just get from map.
+            // Then update the ActionStatistics with the new Action
+            actionsMap.computeIfAbsent(action.getName(), stats -> new ActionStatistics(action.getName()))
+                      .updateStats(action);
+        }
     }
 
     /**
-     * Gets the Map of ActionStatistics.
+     * Gets an ActionStatistics for the given action name.
      *
-     * @return The Map.
+     * @return The ActionStatistics or null if none was found matching the action name.
      */
-    public Map<String, ActionStatistics> getActionsMap() {
-        return actionsMap;
+    public ActionStatistics getActionStatistics(final String key) {
+        if (key != null) {
+            return actionsMap.get(key);
+        }
+        return null;
+    }
+
+    /**
+     * Gets a read only Collection of ActionStatistics
+     *
+     * @return The Collection of ActionStatistics
+     */
+    public Collection<ActionStatistics> getActionStatistics() {
+        return Collections.unmodifiableCollection(actionsMap.values());
     }
 
 }

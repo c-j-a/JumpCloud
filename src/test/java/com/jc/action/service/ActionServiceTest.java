@@ -1,8 +1,11 @@
 package com.jc.action.service;
 
+import com.jc.action.Action;
 import com.jc.action.ActionStatistics;
+import com.jc.action.ActionStatisticsManager;
 import com.jc.error.Error;
 
+import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +13,14 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * To simplify testing and set up all test will be within this file.
+ * Normally we would have have multiple tests like these.
+ * <ul>
+ *     <li>com/jc/action/ActionStatisticsManagerTest.java</li>
+ *     <li>com/jc/action/service/ActionServiceTest.java</li>
+ * </ul>
+ */
 public class ActionServiceTest {
 
     private static final String JUMP = "jump";
@@ -88,7 +99,7 @@ public class ActionServiceTest {
             });
         }
 
-        // Shut down the threads...
+        // Shut down the pool and wait for the threads to finish...
         executorPool.shutdown();
         try {
             executorPool.awaitTermination(1, TimeUnit.MINUTES);
@@ -153,6 +164,65 @@ public class ActionServiceTest {
         // null JSON
         error = actionService.addAction(null);
         Assert.assertNotNull(error);
+    }
+
+    /**
+     * Test the ActionStatisticsManager
+     */
+    @Test
+    public void statisticsManager() {
+        ActionStatisticsManager statsManager = new ActionStatisticsManager();
+
+        // Test that it handles null Actions gracefully
+        try {
+            statsManager.addAction(null);
+        } catch (Exception e) {
+            Assert.fail("This should not have thrown an error.");
+        }
+
+        // Test for concurrency
+        // 100 Threads creating and adding the same 100,000 Actions.
+        ThreadPoolExecutor executorPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
+
+        int loops = 100000;
+        for (int i = 0; i < loops; i++) {
+            long index = i;
+            executorPool.execute(() -> {
+                Action action = new Action();
+                action.setName("ACTION-" + index);
+                action.setTime(index);
+                statsManager.addAction(action);
+            });
+        }
+
+        // Shut down the pool and wait for the threads to finish...
+        executorPool.shutdown();
+        try {
+            executorPool.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Ensure the first and last keys are there
+        Assert.assertNotNull(statsManager.getActionStatistics("ACTION-0"));
+        Assert.assertNotNull(statsManager.getActionStatistics("ACTION-" + (loops-1)));
+
+        Assert.assertNull(statsManager.getActionStatistics("DoesNotExist"));
+
+        // Test that this handles nulls
+        Assert.assertNull(statsManager.getActionStatistics(null));
+
+
+        // Make sure we can't modify the list we get
+        try {
+            statsManager.getActionStatistics().clear();
+            Assert.fail("This should not have worked.");
+        } catch (Exception e) {
+            // Pass, size will be verified next
+        }
+
+        Assert.assertEquals(loops, statsManager.getActionStatistics().size());
+
     }
 
     private void assertResults(ActionStatistics actualStats,
