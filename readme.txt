@@ -24,7 +24,7 @@ Running Tests
 1. Navigate to src/test/java/com/jc/test/action/service and open ActionServiceTest.java
 2. Click the 'Run' menu and then 'Run' or 'Debug'
 3. Choose 'ActionServiceTest'
-4. Four tests should have been run and all four should pass
+4. Five tests should have been run and all five should pass
 
 
 -------------------------------------------------------------------------------
@@ -45,4 +45,4 @@ Import Project
 Running Tests
 1. Navigate to src/test/java/com/jc/test/action/service and open ActionServiceTest.java
 2. Click the 'Run' menu and then 'Run As' or 'Debug As' and then 'JUnit Test'
-3. Four tests should have been run and all four should pass
+3. Five tests should have been run and all five should pass
